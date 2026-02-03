@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -16,7 +17,19 @@ const navItems = [
   { href: "/app/invoices", label: "Facturen" },
   { href: "/app/reports", label: "Rapportages" },
   { href: "/app/settings", label: "Instellingen" }
-];
+] as const satisfies ReadonlyArray<{ href: Route; label: string }>;
+
+type Org = {
+  id: string;
+  name: string;
+};
+
+type OrgMembership = {
+  org_id: string;
+  role: string;
+  orgs: Org[] | null;
+  org: Org | null;
+};
 
 async function setOrgAction(formData: FormData) {
   "use server";
@@ -49,7 +62,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const { data: orgMemberships } = await supabase
     .from("org_members")
-    .select("org_id, role, orgs(name)")
+    .select("org_id, role, orgs(id, name)")
     .eq("user_id", user.id);
 
   if (!orgMemberships || orgMemberships.length === 0) {
@@ -67,6 +80,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
     );
   }
+
+  const memberships: OrgMembership[] = orgMemberships.map((membership) => ({
+    ...membership,
+    org: membership.orgs?.[0] ?? null
+  }));
 
   const cookieStore = cookies();
   const activeOrgId = cookieStore.get("org_id")?.value;
@@ -87,7 +105,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               defaultValue={active.org_id}
               className="rounded-md border border-input bg-background px-2 py-1 text-sm"
             >
-              {orgMemberships.map((membership) => (
+              {memberships.map((membership) => (
                 <option key={membership.org_id} value={membership.org_id}>
                   {getOrgName(membership) ?? membership.org_id}
                 </option>
