@@ -1,6 +1,16 @@
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 
+type CookieOptions = {
+  path?: string;
+  maxAge?: number;
+  domain?: string;
+  sameSite?: "lax" | "strict" | "none";
+  secure?: boolean;
+  httpOnly?: boolean;
+  expires?: Date;
+};
+
 export function createSupabaseServerClient() {
   const cookieStore = cookies();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -12,14 +22,14 @@ export function createSupabaseServerClient() {
 
   return createServerClient(url, anonKey, {
     cookies: {
-      get(name) {
+      get(name: string) {
         return cookieStore.get(name)?.value;
       },
-      set(name, value, options) {
-        cookieStore.set({ name, value, ...options });
+      set(name: string, value: string, options?: CookieOptions) {
+        cookieStore.set({ name, value, ...(options ?? {}) });
       },
-      remove(name, options) {
-        cookieStore.set({ name, value: "", ...options, maxAge: 0 });
+      remove(name: string, options?: CookieOptions) {
+        cookieStore.set({ name, value: "", ...(options ?? {}), maxAge: 0 });
       }
     }
   });
