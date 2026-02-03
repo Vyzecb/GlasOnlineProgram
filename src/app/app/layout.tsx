@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -16,7 +17,7 @@ const navItems = [
   { href: "/app/invoices", label: "Facturen" },
   { href: "/app/reports", label: "Rapportages" },
   { href: "/app/settings", label: "Instellingen" }
-];
+] as const satisfies ReadonlyArray<{ href: Route; label: string }>;
 
 type Org = {
   id: string;
