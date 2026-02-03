@@ -18,6 +18,18 @@ const navItems = [
   { href: "/app/settings", label: "Instellingen" }
 ];
 
+type Org = {
+  id: string;
+  name: string;
+};
+
+type OrgMembership = {
+  org_id: string;
+  role: string;
+  orgs: Org[] | null;
+  org: Org | null;
+};
+
 async function setOrgAction(formData: FormData) {
   "use server";
   const orgId = String(formData.get("orgId") ?? "");
@@ -49,7 +61,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const { data: orgMemberships } = await supabase
     .from("org_members")
-    .select("org_id, role, orgs(name)")
+    .select("org_id, role, orgs(id, name)")
     .eq("user_id", user.id);
 
   if (!orgMemberships || orgMemberships.length === 0) {
@@ -68,9 +80,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     );
   }
 
+  const memberships: OrgMembership[] = orgMemberships.map((membership) => ({
+    ...membership,
+    org: membership.orgs?.[0] ?? null
+  }));
+
   const cookieStore = cookies();
   const activeOrgId = cookieStore.get("org_id")?.value;
-  const active = orgMemberships.find((org) => org.org_id === activeOrgId) ?? orgMemberships[0];
+  const active = memberships.find((org) => org.org_id === activeOrgId) ?? memberships[0];
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
@@ -78,7 +95,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="flex items-center justify-between lg:flex-col lg:items-start lg:gap-4">
           <div>
             <p className="text-xs uppercase text-muted-foreground">Actieve org</p>
-            <p className="text-sm font-semibold">{active.orgs?.name ?? "Onbekend"}</p>
+            <p className="text-sm font-semibold">{active.org?.name ?? "Onbekend"}</p>
           </div>
           <form action={setOrgAction} className="flex items-center gap-2">
             <select
@@ -86,9 +103,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               defaultValue={active.org_id}
               className="rounded-md border border-input bg-background px-2 py-1 text-sm"
             >
-              {orgMemberships.map((membership) => (
+              {memberships.map((membership) => (
                 <option key={membership.org_id} value={membership.org_id}>
-                  {membership.orgs?.name ?? membership.org_id}
+                  {membership.org?.name ?? membership.org_id}
                 </option>
               ))}
             </select>
