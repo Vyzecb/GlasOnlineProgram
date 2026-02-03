@@ -2,6 +2,10 @@ import { cookies } from "next/headers";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
+type OrgMembership = {
+  org_id: string;
+};
+
 export async function getActiveOrgId() {
   const supabase = createSupabaseServerClient();
   const {
@@ -23,5 +27,8 @@ export async function getActiveOrgId() {
 
   const cookieStore = cookies();
   const cookieOrgId = cookieStore.get("org_id")?.value;
-  return memberships.find((membership) => membership.org_id === cookieOrgId)?.org_id ?? memberships[0].org_id;
+  return (
+    (memberships as OrgMembership[]).find((membership) => membership.org_id === cookieOrgId)?.org_id ??
+    memberships[0].org_id
+  );
 }

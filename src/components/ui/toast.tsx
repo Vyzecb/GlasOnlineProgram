@@ -19,9 +19,9 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   const toast = React.useCallback((newToast: Omit<Toast, "id">) => {
     const id = crypto.randomUUID();
-    setToasts((current) => [...current, { id, ...newToast }]);
+    setToasts((current: Toast[]) => [...current, { id, ...newToast }]);
     setTimeout(() => {
-      setToasts((current) => current.filter((item) => item.id !== id));
+      setToasts((current: Toast[]) => current.filter((item: Toast) => item.id !== id));
     }, 4000);
   }, []);
 
@@ -29,7 +29,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ toast }}>
       {children}
       <div className="fixed right-6 top-6 z-50 space-y-3">
-        {toasts.map((item) => (
+        {toasts.map((item: Toast) => (
           <div
             key={item.id}
             className="w-80 rounded-lg border border-border bg-card px-4 py-3 shadow-lg"
