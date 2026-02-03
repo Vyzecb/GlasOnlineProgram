@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ChangeEvent } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -47,7 +47,7 @@ export default function CustomerPageClient({ orgId, initialCustomers }: { orgId:
   });
 
   const filtered = useMemo(() => {
-    return customers.filter((customer) => customer.name.toLowerCase().includes(search.toLowerCase()));
+    return customers.filter((customer: Customer) => customer.name.toLowerCase().includes(search.toLowerCase()));
   }, [customers, search]);
 
   const onSubmit = async (values: CustomerForm) => {
@@ -70,7 +70,7 @@ export default function CustomerPageClient({ orgId, initialCustomers }: { orgId:
       return;
     }
 
-    setCustomers((current) => [data, ...current]);
+    setCustomers((current: Customer[]) => [data, ...current]);
     form.reset();
     toast({ title: "Klant opgeslagen", description: data.name });
   };
@@ -86,7 +86,7 @@ export default function CustomerPageClient({ orgId, initialCustomers }: { orgId:
           <div className="flex flex-wrap items-center gap-3">
             <input
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event: ChangeEvent<HTMLInputElement>) => setSearch(event.target.value)}
               placeholder="Zoek klant..."
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm md:max-w-sm"
             />

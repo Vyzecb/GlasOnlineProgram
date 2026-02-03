@@ -3,6 +3,14 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { getActiveOrgId } from "@/lib/auth/getActiveOrg";
 
+type InvoiceRow = {
+  number: string | null;
+  status: string | null;
+  issued_on: string | null;
+  due_on: string | null;
+  total: number | null;
+};
+
 function toCsv(rows: Record<string, string | number | null>[]) {
   if (rows.length === 0) return "";
   const headers = Object.keys(rows[0]);
@@ -38,7 +46,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ invoices: invoices ?? [] });
   }
 
-  const rows = (invoices ?? []).map((invoice) => ({
+  const rows = (invoices ?? []).map((invoice: InvoiceRow) => ({
     number: invoice.number,
     status: invoice.status,
     issued_on: invoice.issued_on,
