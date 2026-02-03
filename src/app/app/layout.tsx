@@ -71,6 +71,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const cookieStore = cookies();
   const activeOrgId = cookieStore.get("org_id")?.value;
   const active = orgMemberships.find((org) => org.org_id === activeOrgId) ?? orgMemberships[0];
+  const getOrgName = (membership: (typeof orgMemberships)[number]) => membership.orgs?.[0]?.name;
 
   return (
     <div className="flex min-h-screen flex-col lg:flex-row">
@@ -78,7 +79,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="flex items-center justify-between lg:flex-col lg:items-start lg:gap-4">
           <div>
             <p className="text-xs uppercase text-muted-foreground">Actieve org</p>
-            <p className="text-sm font-semibold">{active.orgs?.name ?? "Onbekend"}</p>
+            <p className="text-sm font-semibold">{getOrgName(active) ?? "Onbekend"}</p>
           </div>
           <form action={setOrgAction} className="flex items-center gap-2">
             <select
@@ -88,7 +89,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             >
               {orgMemberships.map((membership) => (
                 <option key={membership.org_id} value={membership.org_id}>
-                  {membership.orgs?.name ?? membership.org_id}
+                  {getOrgName(membership) ?? membership.org_id}
                 </option>
               ))}
             </select>
